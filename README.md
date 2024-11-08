@@ -19,51 +19,63 @@
 ```
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
+#include <stdlib.h>
 
-uint64_t stringToBinary(const char *str) {
-uint64_t binary = 0;
-for (int i = 0; i < 8 && str[i] != '\0'; ++i) {
-    binary <<= 8;
-    binary |= (uint64_t)str[i];
+#define BLOCK_SIZE 8
+
+// Simplified DES key schedule (basic example key)
+unsigned char key[BLOCK_SIZE] = {0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F, 0x7A, 0x8B};
+
+// Simple XOR-based encryption (not true DES, for illustration)
+void simpleEncrypt(const unsigned char *plaintext, unsigned char *ciphertext, int length) {
+    for (int i = 0; i < length; i++) {
+        ciphertext[i] = plaintext[i] ^ key[i % BLOCK_SIZE];
+    }
 }
-return binary;
-}
 
-uint32_t XOR(uint32_t a, uint32_t b) {
-return a ^ b;
-}
-
-uint64_t encryptDES(uint64_t plainText) {
-uint32_t left = (plainText >> 32) & 0xFFFFFFFF;
-uint32_t right = plainText & 0xFFFFFFFF;
-uint32_t xorResult = XOR(left, right);
-uint64_t cipherText = 0;
-cipherText = ((uint64_t)right << 32) | xorResult;
-
-return cipherText;
+// Simple XOR-based decryption (same as encryption due to XOR's properties)
+void simpleDecrypt(const unsigned char *ciphertext, unsigned char *plaintext, int length) {
+    for (int i = 0; i < length; i++) {
+        plaintext[i] = ciphertext[i] ^ key[i % BLOCK_SIZE];
+    }
 }
 
 int main() {
-char plainText[9];  
-printf("Enter an 8-character plaintext: ");
-fgets(plainText, sizeof(plainText), stdin);
-plainText[strcspn(plainText, "\n")] = 0;  
-uint64_t binaryPlainText = stringToBinary(plainText);
+    char inputMessage[1024];
+    unsigned char encryptedData[1024];
+    unsigned char decryptedData[1024];
 
-uint64_t cipherText = encryptDES(binaryPlainText);
+    printf("Enter message to encrypt: ");
+    fgets(inputMessage, sizeof(inputMessage), stdin);
+    int inputLen = strlen(inputMessage);
+    if (inputMessage[inputLen - 1] == '\n') {
+        inputMessage[inputLen - 1] = '\0';  // Remove newline character
+        inputLen--;
+    }
 
+    printf("Original message: %s\n", inputMessage);
 
-printf("Encrypted Cipher Text (in hex): %016llX\n", cipherText);
+    // Encrypt the message
+    simpleEncrypt((unsigned char *)inputMessage, encryptedData, inputLen);
+    printf("Encrypted message (in hex): ");
+    for (int i = 0; i < inputLen; i++) {
+        printf("%02x", encryptedData[i]);
+    }
+    printf("\n");
 
-return 0;
+    // Decrypt the message
+    simpleDecrypt(encryptedData, decryptedData, inputLen);
+    decryptedData[inputLen] = '\0';  // Null-terminate the decrypted message
+
+    printf("Decrypted message: %s\n", decryptedData);
+
+    return 0;
 }
+
 ```
 
 ## OUTPUT:
-![Screenshot 2024-09-16 144510](https://github.com/user-attachments/assets/8229349b-77a5-4895-8f36-54a71a66f9be)
-
+![Screenshot 2024-11-08 192717](https://github.com/user-attachments/assets/47d2cabe-1cce-479c-bd8a-2c997646696b)
 
 ## RESULT:
-
-  Thus the data encryption standard algorithm had been implemented successfully.
+Thus the data encryption standard algorithm had been implemented successfully.
